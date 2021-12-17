@@ -27,6 +27,7 @@ if training:
 else:
     model = ppo1.load(save_file,env=env)
 
+
 obs = env.reset()
 print("reseting env")
 done = False

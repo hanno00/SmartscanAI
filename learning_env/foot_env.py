@@ -48,7 +48,7 @@ class FootEnv(gym.Env):
         reward = 5
         reward -= points_deleted * -10
         reward += score * 100
-
+ #test
         # check if done
         percent_deleted = n_points / self.points_in_cloud 
         if self.timestep > self.MAX_STEPS or percent_deleted > self.MAX_DELETED:
