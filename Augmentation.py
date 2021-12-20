@@ -33,6 +33,8 @@ for number,file in enumerate(os.listdir(folder)):
                     new_valOrg = int(adding*length)
                     ExtraPoints = tf.random.shuffle(NewPoints + tf.random.uniform(NewPoints.shape, -par, par, dtype=tf.float64))
                     NewPoints = tf.concat([NewPoints, ExtraPoints[:new_valOrg]], axis=0)
+                move = movement * 100
+                add = adding * 10
                 pcd = o3d.geometry.PointCloud()
                 pcd.points = o3d.utility.Vector3dVector(NewPoints)
-                o3d.io.write_point_cloud("PointClouds/pointcloud{}_{:.2f}_{:.2f}.ply".format(number,movement,adding), pcd)
+                o3d.io.write_point_cloud("PointClouds/pointcloud{}_{:.2f}_{:.2f}.ply".format(number,move,add), pcd)
