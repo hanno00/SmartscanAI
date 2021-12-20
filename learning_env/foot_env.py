@@ -1,4 +1,5 @@
 import math
+import open3d as o3d
 import numpy as np
 import gym
 from gym import spaces
@@ -48,7 +49,7 @@ class FootEnv(gym.Env):
         reward = 5
         reward -= points_deleted * -10
         reward += score * 100
- #test
+ 
         # check if done
         percent_deleted = n_points / self.points_in_cloud 
         if self.timestep > self.MAX_STEPS or percent_deleted > self.MAX_DELETED:
@@ -65,8 +66,8 @@ class FootEnv(gym.Env):
         return self.pc, reward, done, info
 
     def render(self,option):
-        # some rendering stuff here
-        return None
+        #
+        pass
 
     def __change_cloud(self,arg,arg1,etc):
         pc = self.CLOUD
@@ -90,7 +91,4 @@ class FootEnv(gym.Env):
         self.observation_space = spaces.Box(low=-500,high=500,shape=(size,3)) # min and max 50cm voor de voet, in alle richtingen
 
 
-
-
-    
 
