@@ -5,7 +5,7 @@ import numpy as np
 import time
 
 from foot_env import FootEnv
-from augmentation import augmentation
+from Augmentation import Augmentation
 
 generate_new_clouds = False
 training = True
@@ -15,7 +15,7 @@ save_file = ""
 pc_folder = "pc_out"
 
 if generate_new_clouds:
-    augmentation.augment_folder("original_point_clouds",pc_folder)
+    Augmentation.augment_folder("original_point_clouds",pc_folder)
 
 
 env = FootEnv(pc_folder)

@@ -69,7 +69,7 @@ class FootEnv(gym.Env):
         return self.pc, reward, done, info
 
     def render(self,option):
-        #
+        o3d.vi
         pass
 
     def __change_cloud(self):
