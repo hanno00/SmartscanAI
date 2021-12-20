@@ -4,14 +4,22 @@ from stable_baselines.common.policies import MlpPolicy
 import numpy as np
 import time
 
-from learning_env.foot_env import FootEnv
-env = FootEnv()
-env.reset()
+from foot_env import FootEnv
+from augmentation import augmentation
 
+generate_new_clouds = False
 training = True
 continueTraining = False
 iters = 3
 save_file = ""
+pc_folder = "pc_out"
+
+if generate_new_clouds:
+    augmentation.augment_folder("original_point_clouds",pc_folder)
+
+
+env = FootEnv(pc_folder)
+env.reset()
 
 if training:
     if continueTraining:
