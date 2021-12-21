@@ -1,51 +1,28 @@
+from os import stat
 import numpy as np
 import open3d as o3d
-import time
 
-class Triangulation:
-
-    def __init__(self) -> None:
-        pass
+class PcdController:
     
-    def convert_pointcloud_to_faces(self, path):
-        print("Load a ply point cloud, print it, and render it")
-        pcd = self.load_pcd(path)
-        self.draw_pcd(pcd, "Original Pointcloud")
-    
-        print("Downsample the point cloud with a voxel of 0.05")
-        pcd = self.voxel_down_sample(pcd,12)
-        self.draw_pcd(pcd, "Downsampled")
-
-        print("Compute the normal of the downsampled point cloud")
-        pcd = self.computing_normals(pcd,20,5)
-        # self.draw_pcd(pcd, "With computed normals")
-        # pcd = self.orient_normals(pcd,10)
-        # self.compute_cost(pcd,5)
-
-        print("Orient normals")
-        for i in range(10):
-            pcd = self.orient_normals(pcd,(i + 1) * 5)
-            start = time.time()
-            print("angle: ", self.compute_cost(pcd,5))
-            end = time.time()
-            print("time: ", end - start)
-            # self.drawPcd(pcd, "Oriented Normals")
-
-    def voxel_down_sample(self, pcd, size):
+    @staticmethod
+    def voxel_down_sample(pcd, size):
         return pcd.voxel_down_sample(voxel_size=size)
 
-    def computing_normals(self, pcd, r, nn):
+    @staticmethod
+    def computing_normals(pcd, r, nn):
         pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(
             radius=r, max_nn=nn))
         return pcd
 
-    def alpha_meshing(self, pcd, alpha):
+    @staticmethod
+    def alpha_meshing(pcd, alpha):
         print(f"Doing alpha meshing with alpha={alpha:.3f}")
         mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_alpha_shape(pcd, alpha)
         mesh.compute_vertex_normals()
         return mesh
 
-    def ball_meshing(self, pcd):
+    @staticmethod
+    def ball_meshing(pcd):
         distances = pcd.compute_nearest_neighbor_distance()
         avg_dist = np.mean(distances)
         radius = 3 * avg_dist
@@ -57,40 +34,48 @@ class Triangulation:
         mesh.remove_non_manifold_edges()
         return mesh
     
-    def poisson_meshing(self, pcd, depth, width, scale):
+    @staticmethod
+    def poisson_meshing(pcd, depth, width, scale):
         mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth=8, width=0, scale=2, linear_fit=False)[0]
         return mesh.crop(pcd.get_axis_aligned_bounding_box())
 
-    def orient_normals(self,pcd,value):
+    @staticmethod
+    def orient_normals(pcd,value):
         pcd.orient_normals_consistent_tangent_plane(value)
         return pcd
 
-    def load_pcd(self, path):
+    @staticmethod
+    def load_pcd(path):
         return o3d.io.read_point_cloud(path)
 
-    def draw_pcd(self, pcd, title):
+    @staticmethod
+    def draw_pcd(pcd, title):
         o3d.visualization.draw_geometries([pcd],title,mesh_show_back_face=True)
 
-    def get_points(self, pcd, x):
+    @staticmethod
+    def get_points(pcd, x):
         print("Get first X points")
         return np.asarray(pcd.points)[:x]
     
-    def get_normals(self, pcd, x):
+    @staticmethod
+    def get_normals(pcd, x):
         print("Get first X normals")
         return np.asarray(pcd.normals)[:x]
     
-    def compute_cost(self,pcd,knn):
+    @staticmethod
+    def compute_cost(pcd,knn):
         pcd_tree = o3d.geometry.KDTreeFlann(pcd)
         amount_of_points = len(np.asarray(pcd.points))
         total_angle = 0
         for i in range(amount_of_points):
-            total_angle += self.get_total_angle_from_index(pcd,pcd_tree,knn,i)
+            total_angle += Triangulation.get_total_angle_from_index(pcd,pcd_tree,knn,i)
 
         return total_angle / amount_of_points / knn
 
-    def get_total_angle_from_index(self,pcd,pcd_tree,knn,i):
+    @staticmethod
+    def get_total_angle_from_index(pcd,pcd_tree,knn,i):
         
-        normals = self.get_normals_from_neighbours(pcd,pcd_tree,knn,i)
+        normals = Triangulation.get_normals_from_neighbours(pcd,pcd_tree,knn,i)
         anchor_vector = normals[0].tolist()
         
         unit_anchor_vector = anchor_vector / np.linalg.norm(anchor_vector)
@@ -106,7 +91,8 @@ class Triangulation:
                 angles += angle
 
         return angles
-    
-    def get_normals_from_neighbours(self,pcd,pcd_tree,knn,i):
+
+    @staticmethod
+    def get_normals_from_neighbours(pcd,pcd_tree,knn,i):
         [k, idx, _] = pcd_tree.search_knn_vector_3d(pcd.points[i], knn)
         return np.asarray(pcd.normals)[idx]
