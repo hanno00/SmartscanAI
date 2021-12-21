@@ -16,7 +16,8 @@ class FootEnv(gym.Env):
         self.clouds = Augmentation.load_folder(pointclouds_location)
         self.n_clouds = len(self.clouds)
         print(f"Loaded {self.n_clouds} point clouds into memory")
-        self.pc = self.pcd_to_array(self.clouds[0])
+        self.pcd = self.clouds[0]
+        self.pc = self.pcd_to_array(self.pcd)
         self.points_in_cloud = self.pc.shape[0]
         self.scores = []
         self.n_points_deleted = []
@@ -74,10 +75,9 @@ class FootEnv(gym.Env):
 
     def __change_cloud(self):
         rand = np.random.randint(0,self.n_clouds)
-        pcd = self.clouds[rand]
-        pc = self.pcd_to_array(pcd)
-        self.points_in_cloud = pc.shape[0]
-        self.pc = pc
+        self.pcd = self.clouds[rand]
+        self.pc = self.pcd_to_array(self.pcd)
+        self.points_in_cloud = self.pc.shape[0]
 
     def _calc_score(self):
         normals = triangles.getNormals()
