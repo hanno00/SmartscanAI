@@ -3,4 +3,9 @@ import open3d as o3d
 
 from Triangulation import Triangulation
 
-Triangulation.convertPointcloudToFaces("pointclouds/pc1.xyz")
+def meshing():
+    tr = Triangulation()
+    tr.convert_pointcloud_to_faces("pointclouds/pc1.xyz")
+    print("Done")
+
+meshing()
