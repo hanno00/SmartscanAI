@@ -13,15 +13,15 @@ class FootEnv(gym.Env):
         self.PRINT = prints
         self.MAX_STEPS = max_steps
         self.MODEL_SIZE = model_size
-        self.ACTION_SPACE = spaces.Box(low=20,high=20,shape=(model_size,3),dtype=float) # max 2 cm verplaating per punt
-        self.OBSERVATION_SPACE = spaces.Box(low=-500,high=500,shape=(model_size,3),dtype=float) # min and max 50cm voor de voet, in alle richtingen
+        self.action_space = spaces.Box(low=20,high=20,shape=(model_size,3),dtype=float) # max 2 cm verplaating per punt
+        self.observation_space = spaces.Box(low=-500,high=500,shape=(model_size,3),dtype=float) # min and max 50cm voor de voet, in alle richtingen
         self.CLOUDS = Augmentation.load_folder(pointclouds_location)
         self.N_CLOUDS = len(self.CLOUDS)
         print(f"Loaded {self.N_CLOUDS} point clouds into memory")
         print(f'Epochs will termintate after {self.MAX_STEPS} timestaps')
 
         # intit variables
-        self.__change_cloud() #init both self.pcd and self.pc
+        self.__change_cloud() #inits both self.pcd and self.pc
         self.scores = []
         self.distances = []
         self.timestep = 0
@@ -43,6 +43,7 @@ class FootEnv(gym.Env):
         # make new pointcloud and update pcd
         self.pc = np.add(self.pc,actions)
         self.pcd.points = o3d.utility.Vector3dVector(self.pc)
+
         # update score
         score = self.__calc_score()
         self.scores.append(score)
@@ -64,7 +65,7 @@ class FootEnv(gym.Env):
             "score":score,
             "distance_moved":distance,  
         }
-        self.printt("")
+        self.printt(f"Timestep {self.timestep}: reward = {reward}")
 
         return self.pc, reward, done, info
 
@@ -75,19 +76,29 @@ class FootEnv(gym.Env):
         self.printt("Cloud change called")
         rand = np.random.randint(0,self.N_CLOUDS)
         pcd = self.CLOUDS[rand]
-        self.pcd = cloud.down_sample(pcd,self.MODEL_SIZE)
+
+        length = len(pcd.points)
+        if length > self.MODEL_SIZE:
+            self.pcd = cloud.down_sample(pcd,self.MODEL_SIZE)
+            self.printt(f'Model of size {length} down sampled to size {self.MODEL_SIZE}')
+        elif length < self.MODEL_SIZE:
+            self.pcd = Augmentation.upsample(pcd,20,self.MODEL_SIZE)
+            self.printt(f'Model of size {length} up sampled to size {self.MODEL_SIZE}')
+        
         self.pc = self.pcd_to_array(self.pcd)
 
     def __calc_score(self,pcd):
         pcd = cloud.computing_normals(pcd,20,5)
         pcd = cloud.orient_normals(pcd,10)
-        return cloud.compute_cost(pcd,5)      
+        score = cloud.compute_cost(pcd,5)
+        self.printt(f"Model smoothness score: {score}")
+        return score      
 
     def pcd_to_array(self,pcd):
         return np.asarray(pcd.points)
     
     def printt(self,str=''):
-        if self.print:
+        if self.PRINT:
             print(str)
 
     def __calc_moved_distance(self,actions):

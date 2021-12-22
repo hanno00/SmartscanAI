@@ -40,22 +40,22 @@ class Augmentation:
             for adding in np.arange(0,1,0.2):
                 length = len(points)
                 if movement != 0:
-                    NewPoints = tf.random.shuffle(points)
-                    lengthNew = int(movement * len(NewPoints))
-                    NewPointsLeft = NewPoints[:lengthNew]
-                    NewPointsRight = NewPoints[lengthNew:]
-                    NewPointsLeft += tf.random.uniform(NewPointsLeft.shape, -distortion, distortion, dtype=tf.float64)
-                    NewPoints = tf.concat([NewPointsRight, NewPointsLeft], axis=0)
-                    NewPoints = tf.random.shuffle(NewPoints)
+                    new_points = tf.random.shuffle(points)
+                    length_new = int(movement * len(new_points))
+                    new_points_left = new_points[:length_new]
+                    new_points_right = new_points[length_new:]
+                    new_points_left += tf.random.uniform(new_points_left.shape, -distortion, distortion, dtype=tf.float64)
+                    new_points = tf.concat([new_points_right, new_points_left], axis=0)
+                    new_points = tf.random.shuffle(new_points)
                 else:
-                    NewPoints = tf.random.shuffle(points)
+                    new_points = tf.random.shuffle(points)
                 if adding != 0:
-                    length = len(NewPoints)
+                    length = len(new_points)
                     new_valOrg = int(adding*length)
-                    ExtraPoints = tf.random.shuffle(NewPoints + tf.random.uniform(NewPoints.shape, -distortion, distortion, dtype=tf.float64))
-                    NewPoints = tf.concat([NewPoints, ExtraPoints[:new_valOrg]], axis=0)
+                    extra_points = tf.random.shuffle(new_points + tf.random.uniform(new_points.shape, -distortion, distortion, dtype=tf.float64))
+                    new_points = tf.concat([new_points, extra_points[:new_valOrg]], axis=0)
                 pcd = o3d.geometry.PointCloud()
-                pcd.points = o3d.utility.Vector3dVector(NewPoints)
+                pcd.points = o3d.utility.Vector3dVector(new_points)
                 path = os.path.join(save_folder,"pointcloud_{}_{:02.0f}_{:02.0f}.ply".format(number,movement*100,adding*100))
                 o3d.io.write_point_cloud(path, pcd)
                 print(f"Saved pointcloud in {path}.")
@@ -65,9 +65,9 @@ class Augmentation:
         if len(pcd) >= size:
             return pcd
         else:
-            NewPoints = tf.random.shuffle(np.asarray(pcd.points))
+            new_points = tf.random.shuffle(np.asarray(pcd.points))
             new_val_add = size - len(pcd)
-            ExtraPoints = tf.random.shuffle(NewPoints + tf.random.uniform(NewPoints.shape, -distort, distort, dtype=tf.float64))
-            NewPoints = tf.concat([NewPoints, ExtraPoints[:new_val_add]], axis=0)
-            pcd.points = o3d.utility.Vector3dVector(NewPoints)
+            extra_points = tf.random.shuffle(new_points + tf.random.uniform(new_points.shape, -distort, distort, dtype=tf.float64))
+            new_points = tf.concat([new_points, extra_points[:new_val_add]], axis=0)
+            pcd.points = o3d.utility.Vector3dVector(new_points)
             return pcd
