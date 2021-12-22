@@ -1,41 +1,50 @@
-import gym
-from stable_baselines import ppo1
+# disable unimportant warnings
+import warnings
+warnings.filterwarnings("ignore",category=DeprecationWarning,message='.*') 
+warnings.filterwarnings("ignore",category=FutureWarning,message='.*')
+warnings.filterwarnings("ignore",category=PendingDeprecationWarning,message='.*')
+
+# import RL modules
+from stable_baselines import PPO1
 from stable_baselines.common.policies import MlpPolicy
 import numpy as np
-import time
 
-from foot_env import FootEnv
+# import custom classes
+from FootEnvironment import FootEnv
 from Augmentation import Augmentation
 
+# settings
 generate_new_clouds = False
 training = True
 continueTraining = False
 iters = 3
-save_file = ""
+save_file = "trained_models/PPO1/testing"
 pc_folder = "pc_out"
 
+# regenerate dataset if needed
 if generate_new_clouds:
     Augmentation.augment_folder("original_point_clouds",pc_folder)
 
-
-env = FootEnv(pc_folder)
+# init env
+env = FootEnv(pc_folder,prints=True)
 env.reset()
 
+# train model
 if training:
     if continueTraining:
         print("Continue training")
-        model = ppo1.load(save_file,env=env,tensorboard_log="tensorboard_logs/")
+        model = PPO1.load(save_file,env=env,tensorboard_log="trained_models/tensorboard_logs/")
     else:
         print("Train new model")
-        model = ppo1(MlpPolicy, env=env, verbose=1, tensorboard_log="tensorboard_logs/")
+        model = PPO1(MlpPolicy, env=env, verbose=1, tensorboard_log="trained_models/tensorboard_logs/")
     print("Start learning")     
     model.learn(total_timesteps=iters)
     print("Done learning")
     model.save(save_file) 
 else:
-    model = ppo1.load(save_file,env=env)
+    model = PPO1.load(save_file,env=env)
 
-
+# test model
 obs = env.reset()
 print("reseting env")
 done = False

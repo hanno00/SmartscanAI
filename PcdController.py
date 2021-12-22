@@ -1,4 +1,3 @@
-from os import stat
 import numpy as np
 import open3d as o3d
 
@@ -54,12 +53,12 @@ class PcdController:
 
     @staticmethod
     def get_points(pcd, x):
-        print("Get first X points")
+        print(f"Get first {x} points")
         return np.asarray(pcd.points)[:x]
     
     @staticmethod
     def get_normals(pcd, x):
-        print("Get first X normals")
+        print(f"Get first {x} normals")
         return np.asarray(pcd.normals)[:x]
     
     @staticmethod
@@ -68,14 +67,14 @@ class PcdController:
         amount_of_points = len(np.asarray(pcd.points))
         total_angle = 0
         for i in range(amount_of_points):
-            total_angle += Triangulation.get_total_angle_from_index(pcd,pcd_tree,knn,i)
+            total_angle += PcdController.__get_total_angle_from_index(pcd,pcd_tree,knn,i)
 
         return total_angle / amount_of_points / knn
 
     @staticmethod
-    def get_total_angle_from_index(pcd,pcd_tree,knn,i):
+    def __get_total_angle_from_index(pcd,pcd_tree,knn,i):
         
-        normals = Triangulation.get_normals_from_neighbours(pcd,pcd_tree,knn,i)
+        normals = PcdController.__get_normals_from_neighbours(pcd,pcd_tree,knn,i)
         anchor_vector = normals[0].tolist()
         
         unit_anchor_vector = anchor_vector / np.linalg.norm(anchor_vector)
@@ -93,6 +92,6 @@ class PcdController:
         return angles
 
     @staticmethod
-    def get_normals_from_neighbours(pcd,pcd_tree,knn,i):
+    def __get_normals_from_neighbours(pcd,pcd_tree,knn,i):
         [k, idx, _] = pcd_tree.search_knn_vector_3d(pcd.points[i], knn)
         return np.asarray(pcd.normals)[idx]

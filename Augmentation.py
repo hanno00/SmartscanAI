@@ -56,6 +56,6 @@ class Augmentation:
                     NewPoints = tf.concat([NewPoints, ExtraPoints[:new_valOrg]], axis=0)
                 pcd = o3d.geometry.PointCloud()
                 pcd.points = o3d.utility.Vector3dVector(NewPoints)
-                path = os.path.join(save_folder,"pointcloud_{}_{:.f}_{:.0f}.ply".format(number,movement*100,adding*100))
+                path = os.path.join(save_folder,"pointcloud_{}_{:02.0f}_{:02.0f}.ply".format(number,movement*100,adding*100))
                 o3d.io.write_point_cloud(path, pcd)
                 print(f"Saved pointcloud in {path}.")
