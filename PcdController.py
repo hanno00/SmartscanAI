@@ -2,7 +2,11 @@ import numpy as np
 import open3d as o3d
 
 class PcdController:
-    
+    @staticmethod
+    def down_sample(pcd,size):
+        return pcd
+
+
     @staticmethod
     def voxel_down_sample(pcd, size):
         return pcd.voxel_down_sample(voxel_size=size)

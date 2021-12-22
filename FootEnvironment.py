@@ -8,29 +8,30 @@ from PcdController import PcdController as cloud
 from Augmentation import Augmentation
 
 class FootEnv(gym.Env):    
-    def __init__(self,pointclouds_location,prints=False,max_perc_del=0.1,max_steps=200,model_size=3000):
-        self.print = prints
-        self.clouds = Augmentation.load_folder(pointclouds_location)
-        self.n_clouds = len(self.clouds)
-        print(f"Loaded {self.n_clouds} point clouds into memory")
-        self.pcd = self.clouds[0]
-        self.pc = self.pcd_to_array(self.pcd)
-        self.points_in_cloud = self.pc.shape[0]
-        self.__set_space_size(self.points_in_cloud)
-        self.scores = []
-        self.n_points_deleted = []
-
-        self.MAX_STEPS = max_steps # maximale timesteps
-        self.MAX_DELETED = max_perc_del # float range 0-1, 1=max 100% verwijderen
+    def __init__(self,pointclouds_location,prints=False,max_steps=200,model_size=3000):
+        # set constants
+        self.PRINT = prints
+        self.MAX_STEPS = max_steps
         self.MODEL_SIZE = model_size
+        self.ACTION_SPACE = spaces.Box(low=20,high=20,shape=(model_size,3),dtype=float) # max 2 cm verplaating per punt
+        self.OBSERVATION_SPACE = spaces.Box(low=-500,high=500,shape=(model_size,3),dtype=float) # min and max 50cm voor de voet, in alle richtingen
+        self.CLOUDS = Augmentation.load_folder(pointclouds_location)
+        self.N_CLOUDS = len(self.CLOUDS)
+        print(f"Loaded {self.N_CLOUDS} point clouds into memory")
+        print(f'Epochs will termintate after {self.MAX_STEPS} timestaps')
+
+        # intit variables
+        self.__change_cloud() #init both self.pcd and self.pc
+        self.scores = []
+        self.distances = []
         self.timestep = 0
-        print(f'Epochs will termintate after {self.MAX_DELETED:.0%} points deleted or {self.MAX_STEPS} timestaps')
         return None
 
     def reset(self):
         self.printt("Reset called")
         self.timestep = 0
         self.scores = []
+        self.distances = []
         self.n_points_deleted = []
         self.__change_cloud()
         return self.pc
@@ -39,32 +40,29 @@ class FootEnv(gym.Env):
         done = False
         self.timestep += 1
 
-        # delete points
-        points_deleted = sum(actions)
-        self.n_points_deleted.append(points_deleted)
-        n_points = self.__delete_points(actions)
-
+        # make new pointcloud and update pcd
+        self.pc = np.add(self.pc,actions)
+        self.pcd.points = o3d.utility.Vector3dVector(self.pc)
         # update score
         score = self.__calc_score()
         self.scores.append(score)
 
-        # reward 
-        reward = 100
-        reward -= points_deleted * 10
-        reward -= score * 100
+        # update distances 
+        distance = self.__calc_moved_distance(actions)
+        self.distances.append(distance)
  
+        # reward
+        reward = 500 + score * -50 + distance * -200
+
         # check if done
-        percent_deleted = n_points / self.points_in_cloud 
-        if self.timestep > self.MAX_STEPS or percent_deleted > self.MAX_DELETED:
+        if self.timestep > self.MAX_STEPS:
             done = True
         
         # update info
         info = {
             "timestep":self.timestep,
             "score":score,
-            "points":n_points,
-            "initial_points":self.points_in_cloud,
-            "percent_deleted":percent_deleted,    
+            "distance_moved":distance,  
         }
         self.printt("")
 
@@ -75,42 +73,30 @@ class FootEnv(gym.Env):
 
     def __change_cloud(self):
         self.printt("Cloud change called")
-        #rand = np.random.randint(0,self.n_clouds)
-        rand = 0
-        self.pcd = self.clouds[rand]
+        rand = np.random.randint(0,self.N_CLOUDS)
+        pcd = self.CLOUDS[rand]
+        self.pcd = cloud.down_sample(pcd,self.MODEL_SIZE)
         self.pc = self.pcd_to_array(self.pcd)
-        self.points_in_cloud = self.pc.shape[0]
-        self.printt(f"Shape of new cloud {self.pc.shape}")
-        self.__set_space_size(self.points_in_cloud)
 
-    def __calc_score(self):
-        pcd = cloud.computing_normals(self.pcd,20,5)
+    def __calc_score(self,pcd):
+        pcd = cloud.computing_normals(pcd,20,5)
         pcd = cloud.orient_normals(pcd,10)
-        return cloud.compute_cost(pcd,5)
-        
-
-    def __delete_points(self,actions):
-        actions = actions > 0 #convert float action to boolean actions
-        self.pc = self.pc[actions] # omdat action = [0,1] kan de array gebruikt worden als mask
-        #self.pcd = o3d.geometry.PointCloud()
-        self.pcd.points = o3d.utility.Vector3dVector(self.pc)
-        points_left = self.pc.shape[0]
-        self.printt(f"Deleted some points, {points_left} points remaining")
-        self.__set_space_size(points_left)
-        return points_left
-
-
-    def __set_space_size(self,size):
-        self.printt(f"Set size of observation space to ({size}, 3)")
-        self.action_space = spaces.MultiBinary(size) # 0 = delete, 1 = no-delete
-        self.observation_space = spaces.Box(low=-500,high=500,shape=(size,3),dtype=float) # min and max 50cm voor de voet, in alle richtingen
+        return cloud.compute_cost(pcd,5)      
 
     def pcd_to_array(self,pcd):
         return np.asarray(pcd.points)
     
-    def printt(self,str):
+    def printt(self,str=''):
         if self.print:
             print(str)
+
+    def __calc_moved_distance(self,actions):
+        squares = np.square(actions)
+        total = 0
+        for row in squares:
+            total += np.sqrt(sum(row))
+        self.printt(f'Distance moved: {total}')
+        return total
 
 
 
