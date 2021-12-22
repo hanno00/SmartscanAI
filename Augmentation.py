@@ -62,11 +62,11 @@ class Augmentation:
     
     @staticmethod
     def upsample(pcd,distort,size=3000):
-        if len(pcd) >= size:
+        if len(np.asarray(pcd.points)) >= size:
             return pcd
         else:
             new_points = tf.random.shuffle(np.asarray(pcd.points))
-            new_val_add = size - len(pcd)
+            new_val_add = size - len(np.asarray(pcd.points))
             extra_points = tf.random.shuffle(new_points + tf.random.uniform(new_points.shape, -distort, distort, dtype=tf.float64))
             new_points = tf.concat([new_points, extra_points[:new_val_add]], axis=0)
             pcd.points = o3d.utility.Vector3dVector(new_points)
