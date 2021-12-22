@@ -59,3 +59,15 @@ class Augmentation:
                 path = os.path.join(save_folder,"pointcloud_{}_{:02.0f}_{:02.0f}.ply".format(number,movement*100,adding*100))
                 o3d.io.write_point_cloud(path, pcd)
                 print(f"Saved pointcloud in {path}.")
+    
+    @staticmethod
+    def upsample(pcd,distort,size=3000):
+        if len(pcd) >= size:
+            return pcd
+        else:
+            NewPoints = tf.random.shuffle(np.asarray(pcd.points))
+            new_val_add = size - len(pcd)
+            ExtraPoints = tf.random.shuffle(NewPoints + tf.random.uniform(NewPoints.shape, -distort, distort, dtype=tf.float64))
+            NewPoints = tf.concat([NewPoints, ExtraPoints[:new_val_add]], axis=0)
+            pcd.points = o3d.utility.Vector3dVector(NewPoints)
+            return pcd
