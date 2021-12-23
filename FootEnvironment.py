@@ -28,11 +28,10 @@ class FootEnv(gym.Env):
         return None
 
     def reset(self):
-        self.printt("Reset called")
+        self.printt("Resetting environment...")
         self.timestep = 0
         self.scores = []
         self.distances = []
-        self.n_points_deleted = []
         self.__change_cloud()
         return self.pc
     
@@ -73,17 +72,17 @@ class FootEnv(gym.Env):
         cloud.draw_pcd(self.pcd,title)
 
     def __change_cloud(self):
-        self.printt("Cloud change called")
+        self.printt("Cloud changed to random cloud")
         rand = np.random.randint(0,self.N_CLOUDS)
         pcd = self.CLOUDS[rand]
 
         length = len(pcd.points)
         if length > self.MODEL_SIZE:
             self.pcd = cloud.down_sample(pcd,self.MODEL_SIZE)
-            self.printt(f'Model of size {length} down sampled to size {self.MODEL_SIZE}')
+            self.printt(f'Model of {length} points downsampled to {self.MODEL_SIZE} points')
         elif length < self.MODEL_SIZE:
-            self.pcd = Augmentation.upsample(pcd,20,self.MODEL_SIZE)
-            self.printt(f'Model of size {length} up sampled to size {self.MODEL_SIZE}')
+            self.pcd = Augmentation.upsample(pcd,self.MODEL_SIZE)
+            self.printt(f'Model of {length} points upsampled to {self.MODEL_SIZE} points')
         
         self.pc = self.pcd_to_array(self.pcd)
 

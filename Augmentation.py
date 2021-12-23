@@ -31,11 +31,11 @@ class Augmentation:
             print(f'Folder {save_folder} cannot be found!')
             return
         
-        foot = pd.read_csv(file)
+        foot = pd.read_csv(file,dtype=float)
         points = []
         for i in range(len(foot)):
             points.append([foot["X"][i],foot["Y"][i],foot["Z"][i]])
-
+        
         for movement in np.arange(0,0.75,0.15):
             for adding in np.arange(0,1,0.2):
                 length = len(points)
@@ -61,13 +61,13 @@ class Augmentation:
                 print(f"Saved pointcloud in {path}.")
     
     @staticmethod
-    def upsample(pcd,distort,size=3000):
+    def upsample(pcd,size,distortion=20):
         if len(np.asarray(pcd.points)) >= size:
             return pcd
         else:
             new_points = tf.random.shuffle(np.asarray(pcd.points))
             new_val_add = size - len(np.asarray(pcd.points))
-            extra_points = tf.random.shuffle(new_points + tf.random.uniform(new_points.shape, -distort, distort, dtype=tf.float64))
+            extra_points = tf.random.shuffle(new_points + tf.random.uniform(new_points.shape, -distortion, distortion, dtype=tf.float64))
             new_points = tf.concat([new_points, extra_points[:new_val_add]], axis=0)
             pcd.points = o3d.utility.Vector3dVector(new_points)
             return pcd

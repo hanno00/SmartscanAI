@@ -5,8 +5,7 @@ warnings.filterwarnings("ignore",category=FutureWarning,message='.*')
 warnings.filterwarnings("ignore",category=PendingDeprecationWarning,message='.*')
 
 # import RL modules
-from stable_baselines import PPO1
-from stable_baselines.common.policies import MlpPolicy
+from stable_baselines3 import PPO
 import numpy as np
 
 # import custom classes
@@ -18,7 +17,7 @@ generate_new_clouds = False
 training = True
 continueTraining = False
 iters = 3
-save_file = "trained_models/PPO1/testing"
+save_file = "trained_models/PPO/testing"
 pc_folder = "pc_out"
 
 # regenerate dataset if needed
@@ -33,16 +32,16 @@ env.reset()
 if training:
     if continueTraining:
         print("Continue training")
-        model = PPO1.load(save_file,env=env,tensorboard_log="trained_models/tensorboard_logs/")
+        model = PPO.load(save_file,env=env,tensorboard_log="trained_models/tensorboard_logs/")
     else:
         print("Train new model")
-        model = PPO1(MlpPolicy, env=env, verbose=1, tensorboard_log="trained_models/tensorboard_logs/")
+        model = PPO('MlpPolicy', env=env, verbose=1, tensorboard_log="trained_models/tensorboard_logs/")
     print("Start learning")     
     model.learn(total_timesteps=iters)
     print("Done learning")
     model.save(save_file) 
 else:
-    model = PPO1.load(save_file,env=env)
+    model = PPO.load(save_file,env=env)
 
 # test model
 obs = env.reset()

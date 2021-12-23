@@ -4,7 +4,7 @@ import open3d as o3d
 from PcdController import PcdController as pc
 
 def testing():
-    pcd = pc.load_pcd("pointclouds/pc1.xyz")
+    pcd = pc.load_pcd("pc_out/pointcloud_0_00_00.ply")
     pc.draw_pcd(pcd,"Original")
 
     pcd = pc.voxel_down_sample(pcd,12)
