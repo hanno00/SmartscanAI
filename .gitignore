@@ -1,6 +1,8 @@
 pointclouds
 plyOutput
-
+pc_out
+csv_out
+ply_out
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

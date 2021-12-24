@@ -11,18 +11,18 @@ import numpy as np
 # import custom classes
 from FootEnvironment import FootEnv
 from Augmentation import Augmentation
-
+from Preprocessing import Preprocessing
 # settings
 generate_new_clouds = False
 training = True
 continueTraining = False
 iters = 3
 save_file = "trained_models/PPO/testing"
-pc_folder = "pc_out"
+pc_folder = "ply_out"
 
 # regenerate dataset if needed
 if generate_new_clouds:
-    Augmentation.augment_folder("original_point_clouds",pc_folder)
+    Augmentation.augment_folder("original_point_clouds",pc_folder,csv=False)
 
 # init env
 env = FootEnv(pc_folder,prints=True)
@@ -45,7 +45,6 @@ else:
 
 # test model
 obs = env.reset()
-print("reseting env")
 done = False
 hists = []
 for i in range(10):
