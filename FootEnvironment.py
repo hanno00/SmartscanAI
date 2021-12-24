@@ -54,7 +54,7 @@ class FootEnv(gym.Env):
         self.distances.append(distance)
  
         # reward
-        reward = 500 + score * -50 + distance * -200
+        reward = 200 + score * -50 + distance * -0.01
 
         # check if done
         if self.timestep > self.MAX_STEPS:
