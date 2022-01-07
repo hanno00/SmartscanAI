@@ -20,10 +20,10 @@ class Preprocessing():
         pcd = Preprocessing.csv_to_pcd(input_file)
         length = len(pcd.points)
         if length > file_output_size:
-            pcd = Preprocessing.down_sample(pcd,file_output_size)
+            pcd = Preprocessing.down_sample(pcd,file_output_size,voxel_size,max_distortion)
             print(f'Model of {length} points downsampled to {file_output_size} points')
         elif length < file_output_size:
-            pcd = Preprocessing.up_sample(pcd,file_output_size)
+            pcd = Preprocessing.up_sample(pcd,file_output_size,max_distortion)
             print(f'Model of {length} points upsampled to {file_output_size} points')
         o3d.io.write_point_cloud(output_file.replace('.csv','.ply'), pcd)
         
