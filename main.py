@@ -1,11 +1,21 @@
 import numpy as np
 import open3d as o3d
 
-from Triangulation import Triangulation
+from PcdController import PcdController as pc
 
-def meshing():
-    tr = Triangulation()
-    tr.convert_pointcloud_to_faces("pointclouds/pc1.xyz")
-    print("Done")
+def testing():
+    pcd = pc.load_pcd("pc_out/pointcloud_0_00_00.ply")
+    pc.draw_pcd(pcd,"Original")
 
-meshing()
+    pcd = pc.voxel_down_sample(pcd,12)
+    pc.draw_pcd(pcd,"Downsampled")
+
+    pcd = pc.computing_normals(pcd,20,5)
+    pc.draw_pcd(pcd,"Normals")
+
+    pcd = pc.orient_normals(pcd, 10)
+    pc.draw_pcd(pcd,"Oriented normals")
+    
+    print("Computed cost: ", pc.compute_cost(pcd,5))
+        
+testing()
