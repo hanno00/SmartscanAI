@@ -17,9 +17,9 @@ from Augmentation import Augmentation
 
 class Agent():
     @staticmethod
-    def training(pc_folder,save_file,iters,training,continueTraining,prints=False):
+    def training(pc_folder,save_file,iters,training,continueTraining,steps_max,size_model,prints=False):
         # init env
-        env = FootEnv(pc_folder,prints)
+        env = FootEnv(pc_folder,prints,max_steps=steps_max,model_size=size_model)
         env.reset()
 
         # train model

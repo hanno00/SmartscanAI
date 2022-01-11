@@ -11,6 +11,7 @@ from rl_agent import Agent
 
 # settings
 generate_new_clouds = False
+down_sample_clouds = False
 training = True
 continueTraining = False
 iters = 3
@@ -21,16 +22,21 @@ pc_processed_folder = "ply_out"
 pc_org_folder = "original_point_clouds"
 size = 1000
 result = "Result/PointCloudResult"
+voxel_size = 18 ## Default:18 bij size 1000 
+distortian = 20 ## Default:20
+csv = False ## Default: False
+steps = 20 ## Default:20
 
 def Main():
 
     if generate_new_clouds:
-        Augmentation.augment_folder(pc_org_folder,pc_out_folder,csv=False)
+        Augmentation.augment_folder(pc_org_folder,pc_out_folder,distortian,csv)
     
-    Preprocessing.convert_folder(pc_out_folder,pc_processed_folder,size)
+    if down_sample_clouds:
+        Preprocessing.convert_folder(pc_out_folder,pc_processed_folder,size,distortian,voxel_size)
 
     if training:
-        Agent.training(pc_processed_folder,save_file,iters,training,continueTraining)
+        Agent.training(pc_processed_folder,save_file,iters,training,continueTraining,steps_max=steps,size_model=size)
     else:
         pcd = o3d.io.read_point_cloud(path)
         Agent.predict(save_file,pcd,pc_processed_folder,result)

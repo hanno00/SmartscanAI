@@ -31,13 +31,13 @@ class Augmentation:
         return lijst
     
     @staticmethod
-    def augment_folder(folder, save_folder, csv=True, distortion=20):
+    def augment_folder(folder, save_folder,distortion, csv=True):
         for nummer, file in enumerate(os.listdir(folder)):
             path = os.path.join(folder,file)
-            Augmentation.augment_file(path, save_folder,csv,nummer,distortion)  
+            Augmentation.augment_file(path, save_folder,distortion,csv,nummer)  
 
     @staticmethod
-    def augment_file(file, save_folder, csv=True, number=None, distortion=20):
+    def augment_file(file, save_folder,distortion, csv=True, number=None):
         if not file.endswith('.csv'):
             print(f"File {file} is not CSV!")
             return
