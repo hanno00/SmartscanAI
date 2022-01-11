@@ -1,9 +1,3 @@
-# disable unimportant warnings
-import warnings
-warnings.filterwarnings("ignore",category=DeprecationWarning,message='.*') 
-warnings.filterwarnings("ignore",category=FutureWarning,message='.*')
-warnings.filterwarnings("ignore",category=PendingDeprecationWarning,message='.*')
-
 # import RL modules
 from stable_baselines3 import PPO
 import numpy as np
@@ -12,11 +6,12 @@ import numpy as np
 from FootEnvironment import FootEnv
 from Augmentation import Augmentation
 from Preprocessing import Preprocessing
+
 # settings
 generate_new_clouds = False
 training = True
-continueTraining = False
-iters = 3
+continueTraining = True
+iters = 1
 save_file = "trained_models/PPO/testing"
 pc_folder = "ply_out"
 
@@ -47,7 +42,7 @@ else:
 obs = env.reset()
 done = False
 hists = []
-for i in range(10):
+for i in range(1):
     obs = env.reset()
     hist = []
     while not done:

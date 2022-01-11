@@ -8,7 +8,7 @@ from PcdController import PcdController as cloud
 from Augmentation import Augmentation
 
 class FootEnv(gym.Env):    
-    def __init__(self,pointclouds_location,prints=False,max_steps=200,model_size=3500):
+    def __init__(self,pointclouds_location,prints=False,max_steps=20,model_size=3500):
         # set constants
         self.PRINT = prints
         self.MAX_STEPS = max_steps
@@ -17,6 +17,7 @@ class FootEnv(gym.Env):
         self.observation_space = spaces.Box(low=-500,high=500,shape=(model_size*3,),dtype=float) # min and max 50cm voor de voet, in alle richtingen
         self.CLOUDS = Augmentation.load_folder_ply(pointclouds_location)
         self.N_CLOUDS = len(self.CLOUDS)
+        assert self.N_CLOUDS > 0, f"Unable to find any .ply files in {pointclouds_location}"
         print(f"Loaded {self.N_CLOUDS} point clouds into memory")
         print(f'Epochs will termintate after {self.MAX_STEPS} timestaps')
 
@@ -27,12 +28,12 @@ class FootEnv(gym.Env):
         self.timestep = 0
         return None
 
-    def reset(self):
+    def reset(self,fixed_pcd=None):
         self.printt("Resetting environment...")
         self.timestep = 0
         self.scores = []
         self.distances = []
-        self.__change_cloud()
+        self.__change_cloud(fixed_pcd)
         return self.pc.flatten()
     
     def step(self, actions):
@@ -73,11 +74,15 @@ class FootEnv(gym.Env):
     def render(self,title="PointCloud"):
         cloud.draw_pcd(self.pcd,title)
 
-    def __change_cloud(self):
+    def __change_cloud(self,fixed_pcd=None):
         self.printt("Cloud changed to random cloud")
-        rand = np.random.randint(0,self.N_CLOUDS)
-        self.pcd = self.CLOUDS[rand]
+        if fixed_pcd:
+            self.pcd = fixed_pcd
+        else:
+            rand = np.random.randint(0,self.N_CLOUDS)
+            self.pcd = self.CLOUDS[rand]
         self.pc = self.pcd_to_array(self.pcd)
+        self.original_cloud = self.pc
         assert len(self.pc)==self.MODEL_SIZE,"Loaded point cloud does not match the expected size!"
 
     def __calc_score(self):
@@ -95,7 +100,8 @@ class FootEnv(gym.Env):
             print(str)
 
     def __calc_moved_distance(self,actions):
-        squares = np.square(actions)
+        distance_since_start = self.original_cloud - self.pc + actions
+        squares = np.square(distance_since_start)
         total = 0
         for row in squares:
             total += np.sqrt(sum(row))
