@@ -11,7 +11,7 @@ from Preprocessing import Preprocessing
 generate_new_clouds = False
 training = True
 continueTraining = True
-iters = 1
+iters = 50 # total number of timesteps to take, so with 20 steps per itter 
 save_file = "trained_models/PPO/testing"
 pc_folder = "ply_out"
 
@@ -20,14 +20,14 @@ if generate_new_clouds:
     Augmentation.augment_folder("original_point_clouds",pc_folder,csv=False)
 
 # init env
-env = FootEnv(pc_folder,prints=True)
+env = FootEnv(pc_folder,prints=True,)
 env.reset()
 
 # train model
 if training:
     if continueTraining:
         print("Continue training")
-        model = PPO.load(save_file,env=env,tensorboard_log="trained_models/tensorboard_logs/")
+        model = PPO.load(save_file,env=env,verbose=1,tensorboard_log="trained_models/tensorboard_logs/")
     else:
         print("Train new model")
         model = PPO('MlpPolicy', env=env, verbose=1, tensorboard_log="trained_models/tensorboard_logs/")

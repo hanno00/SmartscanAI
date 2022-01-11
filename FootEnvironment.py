@@ -58,7 +58,8 @@ class FootEnv(gym.Env):
         reward = 200 + score * -50 + distance * -0.01
 
         # check if done
-        if self.timestep > self.MAX_STEPS:
+        if self.timestep >= self.MAX_STEPS:
+            self.printt("Max timesteps exeeded")
             done = True
         
         # update info
