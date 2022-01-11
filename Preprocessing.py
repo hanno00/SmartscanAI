@@ -9,15 +9,25 @@ import os
 class Preprocessing():
     @staticmethod
     def convert_folder(input_folder,output_folder,file_output_size,max_distortion=20,voxel_size=10):
+
         for file in os.listdir(input_folder):
+
             path_in = os.path.join(input_folder,file)
+
             path_out = os.path.join(output_folder,file)
-            if file.endswith('.csv'):
+
+            if file.endswith('.csv') or file.endswith('.ply'):
+
                 Preprocessing.convert_file(path_in,path_out,file_output_size,max_distortion,voxel_size)
 
-    @staticmethod 
+    @staticmethod
     def convert_file(input_file,output_file,file_output_size,max_distortion=20,voxel_size=10):
-        pcd = Preprocessing.csv_to_pcd(input_file)
+        if input_file.endswith('.csv'):
+            pcd = Preprocessing.csv_to_pcd(input_file)
+        elif input_file.endswith('.ply'):
+            pcd = o3d.io.read_point_cloud(input_file)
+        else:
+            return
         length = len(pcd.points)
         if length > file_output_size:
             pcd = Preprocessing.down_sample(pcd,file_output_size,voxel_size,max_distortion)

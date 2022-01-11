@@ -77,6 +77,3 @@ class Augmentation:
                 else:
                     o3d.io.write_point_cloud(path+'.ply', pcd)
                 print(f"Saved pointcloud in {path}.")
-
-
-    
