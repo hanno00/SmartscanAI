@@ -82,10 +82,9 @@ class PcdController:
             n_vector = normals[j].tolist()
             unit_n_vector = n_vector / np.linalg.norm(n_vector)
             dot_product = np.dot(unit_anchor_vector, unit_n_vector)
-            angle = np.arccos(dot_product)
 
-            # Check for isnan when two vectors are parallel
-            if (not np.isnan(angle)):
+            if -1 < dot_product and dot_product < 1:
+                angle = np.arccos(dot_product)
                 angles += angle
 
         return angles
