@@ -13,7 +13,7 @@ class FootEnv(gym.Env):
         self.PRINT = prints
         self.MAX_STEPS = max_steps
         self.MODEL_SIZE = model_size
-        self.action_space = spaces.Box(low=10,high=10,shape=(model_size*3,),dtype=float) # max 1 cm verplaating per punt
+        self.action_space = spaces.Box(low=-10,high=10,shape=(model_size*3,),dtype=float) # max 1 cm verplaating per punt
         self.observation_space = spaces.Box(low=-500,high=500,shape=(model_size*3,),dtype=float) # min and max 50cm voor de voet, in alle richtingen
         self.CLOUDS = Augmentation.load_folder_ply(pointclouds_location)
         self.N_CLOUDS = len(self.CLOUDS)
