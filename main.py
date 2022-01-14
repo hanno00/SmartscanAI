@@ -8,29 +8,29 @@ from Agent import Agent
 # settings
 # Augmentation
 augment_new_pointclouds = False
+original_pointclouds = "original_pointclouds"
 augmented_pointclouds = "sphere"
-save_augmented_as_csv = False ## Default: False
+save_augmented_as_csv = False
 
 # Preprocessing
 preprocess_pointclouds_to_size = False
 preprocessing_size = 1000
-downsample_voxelsize = 18 ## Default:18 bij size 1000 
-original_pointclouds = "original_pointclouds"
+downsample_voxelsize = 18
 preprocessed_pointclouds = "preprocessed_pointclouds"
-distortion = 20 ## Default:20
+distortion = 20
 
 # Training
 train = False
 continue_training = True
 training_iterations = 100
-steps_per_iteration = 20 ## Default:20
+steps_per_iteration = 20
 trained_model_filepath = "trained_models/PPO/testing"
 verbose_training = True
 
 # Predicting
 predict = True
 prediction_input_filepath = "preprocessed_pointclouds/hydrant.ply"
-predicted_pointclouds = "Result/PointCloudResult"
+predicted_pointclouds = "result/pointcloud_result"
 verbose_prediction = False
 
 def Main():
