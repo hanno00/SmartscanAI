@@ -1,44 +1,51 @@
-import numpy as np
 import open3d as o3d
-import os
 
 # import custom classes
-from FootEnvironment import FootEnv
 from Augmentation import Augmentation
 from Preprocessing import Preprocessing
-from PcdController import PcdController 
-from rl_agent import Agent
+from Agent import Agent
 
 # settings
-generate_new_clouds = False
-down_sample_clouds = False
-training = True
-continueTraining = False
-iters = 3
-path = "ply_out/pointcloud_0_00_00.ply"
-save_file = "trained_models/PPO/testing"
-pc_out_folder = "pc_out"
-pc_processed_folder = "ply_out"
-pc_org_folder = "original_point_clouds"
-size = 1000
-result = "Result/PointCloudResult"
-voxel_size = 18 ## Default:18 bij size 1000 
-distortian = 20 ## Default:20
-csv = False ## Default: False
-steps = 20 ## Default:20
+# Augmentation
+augment_new_pointclouds = False
+augmented_pointclouds = "sphere"
+save_augmented_as_csv = False ## Default: False
+
+# Preprocessing
+preprocess_pointclouds_to_size = False
+preprocessing_size = 1000
+downsample_voxelsize = 18 ## Default:18 bij size 1000 
+original_pointclouds = "original_pointclouds"
+preprocessed_pointclouds = "preprocessed_pointclouds"
+distortion = 20 ## Default:20
+
+# Training
+train = False
+continue_training = True
+training_iterations = 100
+steps_per_iteration = 20 ## Default:20
+trained_model_filepath = "trained_models/PPO/testing"
+verbose_training = True
+
+# Predicting
+predict = True
+prediction_input_filepath = "preprocessed_pointclouds/hydrant.ply"
+predicted_pointclouds = "Result/PointCloudResult"
+verbose_prediction = False
 
 def Main():
 
-    if generate_new_clouds:
-        Augmentation.augment_folder(pc_org_folder,pc_out_folder,distortian,csv)
+    if augment_new_pointclouds:
+        Augmentation.augment_folder(original_pointclouds,augmented_pointclouds,distortion,save_augmented_as_csv)
     
-    if down_sample_clouds:
-        Preprocessing.convert_folder(pc_out_folder,pc_processed_folder,size,distortian,voxel_size)
+    if preprocess_pointclouds_to_size:
+        Preprocessing.convert_folder(augmented_pointclouds,preprocessed_pointclouds,preprocessing_size,distortion,downsample_voxelsize)
 
-    if training:
-        Agent.training(pc_processed_folder,save_file,iters,training,continueTraining,steps_max=steps,size_model=size)
-    else:
-        pcd = o3d.io.read_point_cloud(path)
-        Agent.predict(save_file,pcd,pc_processed_folder,result)
+    if train:
+        Agent.training(preprocessed_pointclouds,trained_model_filepath,training_iterations,continue_training,steps_max=steps_per_iteration,size_model=preprocessing_size, prints=verbose_training)
+    
+    if predict:
+        pcd = o3d.io.read_point_cloud(prediction_input_filepath)
+        Agent.predict(trained_model_filepath,pcd,preprocessed_pointclouds,predicted_pointclouds,prints=verbose_prediction,max_steps=steps_per_iteration,model_size=preprocessing_size)
         
 Main()
